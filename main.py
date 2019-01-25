@@ -1,8 +1,8 @@
+from __future__ import absolute_import
 import sys
-from ZombiesVSPlants.config.config import *
-from ZombiesVSPlants.common.helper import *
+from config.config import *
+from common.helper import *
 import random
-
 
 pygame.init()
 
