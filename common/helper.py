@@ -38,3 +38,14 @@ def load_all_shooters():
 
 def get_nearest_position(source_list, target_number):
     return min(source_list, key=lambda x: abs(x - target_number))
+
+
+class Zombie(pygame.Rect):
+    def __init__(self, left, top, width, height):
+        super(Zombie, self).__init__(left, top, width, height)
+        self.hit = 0
+        self.total_hit = 0
+
+    def add_hit(self):
+        self.hit += 1
+

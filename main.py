@@ -11,9 +11,9 @@ menu_height = 60
 
 # 获取背景草地和僵尸, 包括大小，路径等
 background_grass_path = get_path("background_grass.png")
-zombie_path = get_path("enemy_zombie.png", )
+zombie_path = get_path("enemy_zombie_hat.png", )
 single_line_height = get_image_size("background_grass.png")[1]
-zombie_size = get_image_size("enemy_zombie.png")
+zombie_size = get_image_size("enemy_zombie_hat.png")
 
 # 定义屏幕大小和僵尸路数
 screen_height = LINES*single_line_height+menu_height
@@ -55,7 +55,7 @@ grass = load_image_source(background_grass_path)
 grass_rect = [pygame.Rect(0, i * single_line_height+menu_height, screen_width, single_line_height) for i in range(LINES)]
 # 初始化第一个僵尸
 zombie = load_image_source(zombie_path)
-zombies_rect = [pygame.Rect(zombie_start_x, zombie_start_y+menu_height, zombie_size[0], zombie_size[1])]
+zombies_rect = [Zombie(zombie_start_x, zombie_start_y+menu_height, zombie_size[0], zombie_size[1])]
 # 每隔ZOMBIE_REFRESH_TIME触发僵尸刷新事件
 NEW_ZOMBIE_EVENT = pygame.USEREVENT+1
 pygame.time.set_timer(NEW_ZOMBIE_EVENT, ZOMBIE_REFRESH_TIME)
@@ -95,7 +95,7 @@ while 1:
             new_zombies_lines = random.sample(LINES_LIST, new_zombies_count)
             # 添加新僵尸到僵尸列表里去
             for line in new_zombies_lines:
-                new_zombie_rect = pygame.Rect(zombie_start_x, line * single_line_height + zombie_start_y + menu_height, zombie_size[0], zombie_size[1])
+                new_zombie_rect = Zombie(zombie_start_x, line * single_line_height + zombie_start_y + menu_height, zombie_size[0], zombie_size[1])
                 zombies_rect.append(new_zombie_rect)
     # 绘制顶部武器菜单
     for i in range(len(menu_shooters)):
@@ -120,19 +120,24 @@ while 1:
         mouse_follow_rect = pygame.Rect(pos_follow_mouse[0], pos_follow_mouse[1], 50, 50)
         screen.blit(mouse_follow[0], mouse_follow_rect)
 
-    # 子弹和僵尸的碰撞检测
+    # 绘制所有子弹
     for b in bullets_rect:
         b_r = b[1]
         b_r.x += BULLET_SPEED
         screen.blit(b[0], b_r)
+    # 绘制所有僵尸
     for z in zombies_rect:
         z.x += -ZOMBIE_SPEED_X
         screen.blit(zombie, z)
+    # 子弹和僵尸的碰撞检测
     for i, j in itertools.product(bullets_rect, zombies_rect):
         b_r = i[1]
         z_r = j
-        if b_r.colliderect(z_r):
-            screen.blit(boom, z_r)
-            bullets_rect.remove(i)
-            zombies_rect.remove(j)
+        if z_r.contains(b_r):
+            # 爆炸后删除掉已经碰撞的僵尸和子弹
+            z_r.add_hit()
+            if z_r.hit >= 9:
+                screen.blit(boom, z_r)
+                bullets_rect.remove(i)
+                zombies_rect.remove(j)
     pygame.display.flip()
