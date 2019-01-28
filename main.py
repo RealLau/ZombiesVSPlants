@@ -1,12 +1,10 @@
-import pygame
 import sys
+from ZombiesVSPlants.config.config import *
+from ZombiesVSPlants.common.helper import *
 import random
-
-from ZombiesVSPlants.common.helper import get_nearest_position, load_image_source, load_all_shooters, get_image_size, get_path, get_path
-from ZombiesVSPlants.config.config import BULLET_SPEED, BULLET_REFRESH_TIME, ZOMBIE_REFRESH_TIME, SHOOTER_SIZE, ZOMBIE_SPEED_X, LINES
+import itertools
 
 pygame.init()
-
 
 #顶部菜单高度
 menu_height = 60
@@ -27,7 +25,7 @@ background_color = 255, 255, 255
 ZOMBIE_SPEED = [-ZOMBIE_SPEED_X, 0]
 
 # 其他
-LINES_LIST = [i for i in range(1, LINES+1)]
+LINES_LIST = [i for i in range(0, LINES+1)]
 zombie_start_x = screen_width-zombie_size[0]
 zombie_start_y = (single_line_height-zombie_size[1])/2
 shooter_centered_position__list_y = [line*single_line_height+zombie_start_y+menu_height for line in range(5)]
@@ -40,8 +38,9 @@ mouse_follow_rect = None
 added_shooters = []
 shooter_bullets = []
 bullets_rect = []
+collide_bullet = []
 collide_zombies = []
-collide_bullets = []
+
 # 屏幕大小
 screen = pygame.display.set_mode((screen_width, screen_height))
 # 加载顶部菜单
@@ -115,14 +114,6 @@ while 1:
     for new in added_shooters:
         shooter_rect = pygame.Rect(new[1], new[2], 50, 50)
         screen.blit(new[0], shooter_rect)
-    # 绘制子弹
-    for j in range(len(bullets_rect)):
-        bullets_rect[j][1].x += 1
-        screen.blit(bullets_rect[j][0], bullets_rect[j][1])
-    # 绘制所有僵尸
-    for i in range(len(zombies_rect)):
-        zombies_rect[i].x -= ZOMBIE_SPEED_X
-        screen.blit(zombie, zombies_rect[i])
 
     if dragging and mouse_follow[0]:
         pos_follow_mouse = pygame.mouse.get_pos()
@@ -130,15 +121,18 @@ while 1:
         screen.blit(mouse_follow[0], mouse_follow_rect)
 
     # 子弹和僵尸的碰撞检测
-    for i in range(len(bullets_rect)):
-        for j in range(len(zombies_rect)):
-            if bullets_rect[i][1].colliderect(zombies_rect[j]):
-                screen.blit(boom, zombies_rect[j])
-                collide_bullets.append(bullets_rect[i])
-                collide_zombies.append(zombies_rect[j])
-    bullets_rect = [i for i in bullets_rect if i not in collide_bullets]
-    zombies_rect = [j for j in zombies_rect if j not in collide_zombies]
-    # 如何处理反向的一种很好的方法
-    # if zombie_rect.left < 0 or zombie_rect.right > screen_width:
-    #     ZOMBIE_SPEED[0] = -ZOMBIE_SPEED[0]
+    for b in bullets_rect:
+        b_r = b[1]
+        b_r.x += BULLET_SPEED
+        screen.blit(b[0], b_r)
+    for z in zombies_rect:
+        z.x += -ZOMBIE_SPEED_X
+        screen.blit(zombie, z)
+    for i, j in itertools.product(bullets_rect, zombies_rect):
+        b_r = i[1]
+        z_r = j
+        if b_r.colliderect(z_r):
+            screen.blit(boom, z_r)
+            bullets_rect.remove(i)
+            zombies_rect.remove(j)
     pygame.display.flip()
