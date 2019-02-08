@@ -4,8 +4,14 @@ from ZombiesVSPlants.common.helper import *
 import random
 import itertools
 
-pygame.init()
 
+pygame.init()
+pygame.display.set_caption("Plants vs Zombies")
+logo = load_image_source("logo.png")
+pygame.display.set_icon(logo)
+# 计分板
+score = pygame.font.SysFont('Comic Sans MS', 30)
+score_surface = score.render('Score:', False, (255, 0, 0))
 # 顶部菜单高度
 menu_height = 60
 
@@ -43,6 +49,7 @@ collide_zombies = []
 
 # 屏幕大小
 screen = pygame.display.set_mode((screen_width, screen_height))
+screen.blit(score_surface, (0, 0))
 # 加载顶部菜单
 res = load_all_shooters()
 menu_start_position = 5, 5
@@ -97,6 +104,8 @@ while 1:
             for line in new_zombies_lines:
                 new_zombie_rect = Zombie(zombie_start_x, line * single_line_height + zombie_start_y + menu_height, zombie_size[0], zombie_size[1])
                 zombies_rect.append(new_zombie_rect)
+
+    screen.blit(score_surface, (screen_width-100, 0))
     # 绘制顶部武器菜单
     for i in range(len(menu_shooters)):
         menu_rect = menu_shooters_rect[i]
