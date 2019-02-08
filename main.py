@@ -6,7 +6,7 @@ import itertools
 
 pygame.init()
 
-#顶部菜单高度
+# 顶部菜单高度
 menu_height = 60
 
 # 获取背景草地和僵尸, 包括大小，路径等
@@ -135,9 +135,9 @@ while 1:
         z_r = j
         if z_r.contains(b_r):
             # 爆炸后删除掉已经碰撞的僵尸和子弹
+            bullets_rect.remove(i)
             z_r.add_hit()
-            if z_r.hit >= 9:
+            if z_r.hit >= 3:
                 screen.blit(boom, z_r)
-                bullets_rect.remove(i)
                 zombies_rect.remove(j)
     pygame.display.flip()
